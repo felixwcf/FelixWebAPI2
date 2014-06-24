@@ -41,30 +41,58 @@ namespace FelixWebAPI2.Controllers
         }
 
         // POST api/values
-        public void PostVal([FromBody]string value)
+        [Route("addUser")]
+        public void PostVal()
         {
 
         }
 
         // PUT api/updateUser/user0001
         [HttpPut]
-        [Route("updateUser/{usrid?}")]
-        public string updateUser(string usrid)
+        [Route("editUser/{usrid?}")]
+        public HttpResponseMessage updateUser(string usrid)
         {
+            USERS user = deserializeJson();
 
-            HttpContent requestContent = Request.Content;
-            string jsonContent = requestContent.ReadAsStringAsync().Result;
-            USERS contact = JsonConvert.DeserializeObject<USERS>(jsonContent);
+            string fName = user.first_name;
+            string lName = user.last_name;
+            string email = user.email;
+            string gender = user.gender;
+            string pNum = user.phone;
+            string dob = user.dob;
+            string address = user.address;
+            string city = user.city;
+            string state = user.state;
+            string zipcode = user.zipcode;
+            //string pic = contact.profile_pic;
 
-            string name = contact.first_name;
+            string query = "UPDATE USERS SET " + 
+                           "FIRST_NAME='" + fName + "', " +
+                           "LAST_NAME='" + lName + "', " +
+                           "EMAIL='" + email + "', " +
+                           "GENDER='" + gender + "', " +
+                           "PHONE='" + pNum + "', " +
+                           "DOB='" + dob + "', " +
+                           "ADDRESS='" + address + "', " +
+                           "CITY='" + city + "', " +
+                           "STATE='" + state + "', " +
+                           "ZIPCODE='" + zipcode + "' " +
 
-            return "Answer:: " + name;
+                           "WHERE USER_ID='"+usrid+"'";
+
+            DatabaseConnection dbConn = new DatabaseConnection();
+            return dbConn.editUser(query);
         }
 
-        // DELETE api/values/5
-        public void Delete(int id)
+        [HttpGet]
+        [Route("removeUser/{usrid?}")]
+        public HttpResponseMessage removeUser(string usrid)
         {
+            DatabaseConnection dbConn = new DatabaseConnection();
+
+            return dbConn.deleteUser(usrid); 
         }
+
 
         private HttpResponseMessage ResponseMsg()
         {
@@ -73,6 +101,14 @@ namespace FelixWebAPI2.Controllers
             response.Content = new StringContent("OK");
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             return response;
+        }
+
+        //Get body content if exists
+        private USERS deserializeJson()
+        {
+            HttpContent requestContent = Request.Content;
+            string jsonContent = requestContent.ReadAsStringAsync().Result;
+            return JsonConvert.DeserializeObject<USERS>(jsonContent);
         }
     }
 }
