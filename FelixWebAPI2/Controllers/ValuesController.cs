@@ -15,19 +15,15 @@ namespace FelixWebAPI2.Controllers
     public class ValuesController : ApiController
     {
         [Route("users")]
-        public string Get()
+        public HttpResponseMessage Get()
         {
-            string stringVal = "No Results";
-
             DatabaseConnection dbConn = new DatabaseConnection();
-            //stringValue = dbConn.getString();
 
-            stringVal = dbConn.getUsers();
-
-            return stringVal;
+            return dbConn.getUsers();
         }
 
         // GET api/values/5
+        [HttpGet]
         [Route("test")]
         public string GetTest()
         {
@@ -40,10 +36,41 @@ namespace FelixWebAPI2.Controllers
             return a+" "+i+" "+b;
         }
 
-        // POST api/values
+        // PUT api/addUser
+        [HttpPut]
         [Route("addUser")]
-        public void PostVal()
+        public HttpResponseMessage PostVal()
         {
+            USERS user = deserializeJson();
+
+            string usrid = user.user_id;
+            string fName = user.first_name;
+            string lName = user.last_name;
+            string email = user.email;
+            string gender = user.gender;
+            string pNum = user.phone;
+            string dob = user.dob;
+            string address = user.address;
+            string city = user.city;
+            string state = user.state;
+            string zipcode = user.zipcode;
+            //string pic = contact.profile_pic;
+
+            string query = "INSERT INTO USERS (USER_ID, FIRST_NAME, LAST_NAME, EMAIL, GENDER, PHONE, DOB, ADDRESS, CITY, STATE, ZIPCODE) values(" +
+                "'" + usrid + "', " +
+               "'" + fName + "', " +
+               "'" + lName + "', " +
+               "'" + email + "', " +
+               "'" + gender + "', " +
+               "'" + pNum + "', " +
+               "'" + dob + "', " +
+               "'" + address + "', " +
+               "'" + city + "', " +
+               "'" + state + "', " +
+               "'" + zipcode + "' )";
+
+            DatabaseConnection dbConn = new DatabaseConnection();
+            return dbConn.addUser(query);
 
         }
 
@@ -81,7 +108,7 @@ namespace FelixWebAPI2.Controllers
                            "WHERE USER_ID='"+usrid+"'";
 
             DatabaseConnection dbConn = new DatabaseConnection();
-            return dbConn.editUser(query);
+            return dbConn.addUser(query);
         }
 
         [HttpGet]

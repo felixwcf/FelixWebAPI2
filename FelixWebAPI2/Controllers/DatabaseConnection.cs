@@ -26,13 +26,34 @@ namespace FelixWebAPI2.Controllers
             return "Hello World";
         }
 
-        public string getUsers()
+        //GET USERS - GET 
+        public HttpResponseMessage getUsers()
         {
-            return getResults(QUERY_GET_USER);   
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FelixDBConnectionString"].ToString()))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(QUERY_GET_USER, conn);
+                    SqlDataAdapter sqlDa = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    sqlDa.Fill(dt);
+                    string test = JsonConvert.SerializeObject(dt); // Serialization
+
+                    //JsonConvert.DeserializeObject(test);
+                    DataTable dtt = (DataTable)JsonConvert.DeserializeObject(test, dt.GetType());
+
+                    return responseStatusMessage("OK");
+                }
+                catch (SqlException)
+                {
+                    return responseStatusMessage("FAIL");
+                }
+            }
         }
 
-        //EDIT USER - PUT method
-        public HttpResponseMessage editUser(string query)
+        //ADD USER - PO 
+        public HttpResponseMessage addUser(string query)
         {
             using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FelixDBConnectionString"].ToString()))
             {
@@ -54,30 +75,26 @@ namespace FelixWebAPI2.Controllers
             }
         }
 
-        //GET USERS
-        public string getResults(string queryString)
+        //EDIT USER - PUT 
+        public HttpResponseMessage editUser(string query)
         {
             using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FelixDBConnectionString"].ToString()))
             {
-                String jsonStr = "";
-
                 conn.Open();
-                
+
                 try
                 {
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
-                    SqlDataAdapter sqlDa = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    sqlDa.Fill(dt);
-                    string test = JsonConvert.SerializeObject(dt); // Serialization
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.ExecuteNonQuery();
 
-                    //JsonConvert.DeserializeObject(test);
-                    DataTable dtt = (DataTable)JsonConvert.DeserializeObject(test, dt.GetType());
-                    return test;
+                    return responseStatusMessage("OK");
                 }
-                catch (SqlException) {
-                    return "error";
+                catch (SqlException ex)
+                {
+                    Debug.WriteLine("Edit user ERROR:" + ex);
+                    return responseStatusMessage("FAIL");
                 }
+
             }
         }
 
