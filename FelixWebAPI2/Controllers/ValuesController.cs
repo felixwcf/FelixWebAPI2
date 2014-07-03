@@ -15,7 +15,7 @@ namespace FelixWebAPI2.Controllers
     public class ValuesController : ApiController
     {
         [Route("users")]
-        public HttpResponseMessage Get()
+        public string Get()
         {
             DatabaseConnection dbConn = new DatabaseConnection();
 
@@ -36,12 +36,21 @@ namespace FelixWebAPI2.Controllers
             return a+" "+i+" "+b;
         }
 
+        [HttpGet]
+        [Route("checkUser/{usrid?}")]
+        public HttpResponseMessage checkUser(string usrid)
+        {
+            DatabaseConnection dbConn = new DatabaseConnection();
+
+            return dbConn.checkUserAvailibility(usrid);
+        }
+
         // PUT api/addUser
-        [HttpPut]
+        [HttpPost]
         [Route("addUser")]
         public HttpResponseMessage PostVal()
         {
-            USERS user = deserializeJson();
+            User user = deserializeJson();
 
             string usrid = user.user_id;
             string fName = user.first_name;
@@ -71,15 +80,14 @@ namespace FelixWebAPI2.Controllers
 
             DatabaseConnection dbConn = new DatabaseConnection();
             return dbConn.addUser(query);
-
         }
 
         // PUT api/updateUser/user0001
         [HttpPut]
-        [Route("editUser/{usrid?}")]
+        [Route("updateUser/{usrid?}")]
         public HttpResponseMessage updateUser(string usrid)
         {
-            USERS user = deserializeJson();
+            User user = deserializeJson();
 
             string fName = user.first_name;
             string lName = user.last_name;
@@ -112,7 +120,7 @@ namespace FelixWebAPI2.Controllers
         }
 
         [HttpGet]
-        [Route("removeUser/{usrid?}")]
+        [Route("deleteUser/{usrid?}")]
         public HttpResponseMessage removeUser(string usrid)
         {
             DatabaseConnection dbConn = new DatabaseConnection();
@@ -131,11 +139,11 @@ namespace FelixWebAPI2.Controllers
         }
 
         //Get body content if exists
-        private USERS deserializeJson()
+        private User deserializeJson()
         {
             HttpContent requestContent = Request.Content;
             string jsonContent = requestContent.ReadAsStringAsync().Result;
-            return JsonConvert.DeserializeObject<USERS>(jsonContent);
+            return JsonConvert.DeserializeObject<User>(jsonContent);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace FelixWebAPI2.Controllers
 
     public class DatabaseConnection
     {
-        private readonly string QUERY_GET_USER = "SELECT USER_ID, FIRST_NAME, LAST_NAME, PHONE, CITY FROM USERS";
+        private readonly string QUERY_GET_USER = "SELECT USER_ID, FIRST_NAME, LAST_NAME, PHONE, ADDRESS, DOB, GENDER, EMAIL, ZIPCODE, CITY FROM USERS";
 
 
         public string getString() 
@@ -27,10 +27,11 @@ namespace FelixWebAPI2.Controllers
         }
 
         //GET USERS - GET 
-        public HttpResponseMessage getUsers()
+        public string getUsers()
         {
             using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FelixDBConnectionString"].ToString()))
             {
+
                 try
                 {
                     conn.Open();
@@ -38,16 +39,55 @@ namespace FelixWebAPI2.Controllers
                     SqlDataAdapter sqlDa = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     sqlDa.Fill(dt);
-                    string test = JsonConvert.SerializeObject(dt); // Serialization
+                    string json = JsonConvert.SerializeObject(dt); // Serialization
 
                     //JsonConvert.DeserializeObject(test);
-                    DataTable dtt = (DataTable)JsonConvert.DeserializeObject(test, dt.GetType());
+                    //DataTable dtt = (DataTable)JsonConvert.DeserializeObject(test, dt.GetType());
 
-                    return responseStatusMessage("OK");
+                    json = json.Replace(@"\\", "");
+
+                    return json;
                 }
                 catch (SqlException)
                 {
+                    return "FAIL";
+                    //return responseStatusMessage("FAIL");
+                }
+            }
+        }
+
+        //CHECK USERS - GET 
+        public HttpResponseMessage checkUserAvailibility(string userid)
+        {
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FelixDBConnectionString"].ToString()))
+            {
+
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT USER_ID FROM USERS WHERE USER_ID = '"+ userid + "'" , conn);
+                    SqlDataAdapter sqlDa = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    sqlDa.Fill(dt);
+                    string json = ""; 
+                        
+                    json = JsonConvert.SerializeObject(dt); // Serialization
+
+                    //JsonConvert.DeserializeObject(test);
+                    //DataTable dtt = (DataTable)JsonConvert.DeserializeObject(test, dt.GetType());
+
+                    Debug.WriteLine("json:"+json);
+
+                    if (json != "[]")
+                        return responseStatusMessage("FAIL");
+                    else
+
+                        return responseStatusMessage("OK");
+                }
+                catch (Exception)
+                {
                     return responseStatusMessage("FAIL");
+                    //return responseStatusMessage("FAIL");
                 }
             }
         }
@@ -112,12 +152,15 @@ namespace FelixWebAPI2.Controllers
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.ExecuteNonQuery();
 
-                    return responseStatusMessage("OK");
+                    //return responseStatusMessage("OK");
                 }
                 catch (SqlException)
                 {
                     return responseStatusMessage("FAIL");
                 }
+
+                return responseStatusMessage("OK");
+
             }
         }
 
